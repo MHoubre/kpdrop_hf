@@ -33,6 +33,14 @@ def drop_kp(dataset, p=0.7):
         kps_drop = np.random.binomial(1, p, len(stemmed_kps))
         kps_drop = kps_drop.tolist()
 
+        new_presents = [present_keyphrases[i] for i in range(len(present_keyphrases)) if kps_drop[i] == 0]
+        new_absents = [present_keyphrases[i] for i in range(len(present_keyphrases)) if kps_drop[i] == 0]
+        absents = np.where(np.isin(element["prmu"], "P",invert=True))[0].tolist() # Get all the keyphrases that are NOT a present keyphrase
+        og_absent_keyphrases = [element["keyphrases"][i] for i in absents]
+
+        new_keyphrases = [*new_presents,*new_absents,*og_absent_keyphrases]
+
+
         if kps_drop.count(1) > 0: #if there are keyphrases to mask
 
             title = element["title"]
@@ -104,7 +112,7 @@ def drop_kp(dataset, p=0.7):
                 artificial_instances[element["id"]] = {}
                 artificial_instances[element["id"]]["title"] = " ".join(new_title)
                 artificial_instances[element["id"]]["abstract"] = " ".join(new_abstract)
-                artificial_instances[element["id"]]["keyphrases"] = element["keyphrases"]
+                artificial_instances[element["id"]]["keyphrases"] = new_keyphrases
 
         if k%1000==0:
             print(k)
